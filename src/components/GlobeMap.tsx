@@ -53,9 +53,18 @@ export function GlobeMap({ events, onSelectCountry }: GlobeMapProps) {
     })
 
     map.addControl(new NavigationControl({ visualizePitch: true }), 'top-right')
+    map.on('load', () => {
+      map.resize()
+    })
     mapRef.current = map
 
+    const observer = new ResizeObserver(() => {
+      map.resize()
+    })
+    observer.observe(containerRef.current)
+
     return () => {
+      observer.disconnect()
       map.remove()
       mapRef.current = null
     }
@@ -101,10 +110,18 @@ export function GlobeMap({ events, onSelectCountry }: GlobeMapProps) {
         type: 'circle',
         source: sourceId,
         paint: {
-          'circle-radius': 10,
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            1,
+            14,
+            4,
+            22,
+          ],
           'circle-color': '#3dd6c6',
-          'circle-opacity': 0.18,
-          'circle-blur': 0.8,
+          'circle-opacity': 0.28,
+          'circle-blur': 0.65,
         },
       })
       map.addLayer({
@@ -112,10 +129,19 @@ export function GlobeMap({ events, onSelectCountry }: GlobeMapProps) {
         type: 'circle',
         source: sourceId,
         paint: {
-          'circle-radius': 4,
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            1,
+            5,
+            4,
+            8,
+          ],
           'circle-color': '#f0a35a',
-          'circle-stroke-width': 1,
+          'circle-stroke-width': 1.5,
           'circle-stroke-color': '#070b12',
+          'circle-opacity': 0.95,
         },
       })
       map.on('click', 'event-core', (e: MapLayerMouseEvent) => {

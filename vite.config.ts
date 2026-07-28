@@ -13,6 +13,9 @@ export default defineConfig({
       '@': path.resolve(rootDir, './src'),
     },
   },
+  optimizeDeps: {
+    exclude: ['maplibre-gl'],
+  },
   server: {
     port: 5173,
     proxy: {

@@ -16,10 +16,16 @@ export function useCountry(ref: string) {
   })
 }
 
-export function useEvents(params?: { country?: string; category?: string; q?: string }) {
+export function useEvents(params?: {
+  country?: string
+  category?: string
+  q?: string
+  limit?: number
+}) {
   return useQuery({
     queryKey: ['events', params],
     queryFn: () => api.events(params),
+    refetchInterval: 60_000,
   })
 }
 

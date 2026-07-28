@@ -4,15 +4,22 @@ import { FilterSidebar } from '@/components/FilterSidebar'
 import { EventTicker } from '@/components/EventTicker'
 import { GlobeMap } from '@/components/GlobeMap'
 import { DEMO_EVENTS, DEMO_STATS } from '@/data/demo'
-import { useStats, useTrendingEvents } from '@/hooks/useGeoPulse'
+import { useEvents, useStats, useTrendingEvents } from '@/hooks/useGeoPulse'
 import { useUiStore } from '@/store/ui'
 
 export function HomePage() {
   const trending = useTrendingEvents()
+  const mapEvents = useEvents({ limit: 400 })
   const stats = useStats()
   const selectCountry = useUiStore((s) => s.selectCountry)
 
-  const events = trending.data?.length ? trending.data : DEMO_EVENTS
+  const liveEvents = mapEvents.data?.length
+    ? mapEvents.data
+    : trending.data?.length
+      ? trending.data
+      : DEMO_EVENTS
+  const tickerEvents = trending.data?.length ? trending.data : liveEvents
+  const events = liveEvents
   const board = stats.data ?? DEMO_STATS
 
   const pulseCountries = useMemo(
@@ -48,7 +55,7 @@ export function HomePage() {
               {pulseCountries.map((country) => (
                 <li key={country.country_id}>
                   <Link
-                    to={`/country/${encodeURIComponent(country.name)}`}
+                    to={`/country/${country.country_id}`}
                     className="block rounded-md border border-line bg-ink/40 px-3 py-2 text-sm hover:border-signal/40"
                   >
                     <span className="text-fog">{country.name}</span>
@@ -62,7 +69,7 @@ export function HomePage() {
           </div>
         </div>
 
-        <EventTicker events={events} />
+        <EventTicker events={tickerEvents} />
       </section>
     </>
   )
