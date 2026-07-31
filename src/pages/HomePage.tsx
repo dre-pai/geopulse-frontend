@@ -7,20 +7,33 @@ import { DEMO_EVENTS, DEMO_STATS } from '@/data/demo'
 import { useEvents, useStats, useTrendingEvents } from '@/hooks/useGeoPulse'
 import { useUiStore } from '@/store/ui'
 
+const EMPTY_STATS = {
+  total_events: 0,
+  total_countries: 0,
+  events_last_24h: 0,
+  top_categories: [],
+  hottest_countries: [],
+}
+
 export function HomePage() {
   const trending = useTrendingEvents()
-  const mapEvents = useEvents({ limit: 400 })
+  const mapEvents = useEvents({ limit: 400, hours: 24 })
   const stats = useStats()
   const selectCountry = useUiStore((s) => s.selectCountry)
 
+  const apiOffline = Boolean(mapEvents.isError || stats.isError)
+  const loading = mapEvents.isLoading || stats.isLoading
   const liveEvents = mapEvents.data?.length
     ? mapEvents.data
     : trending.data?.length
       ? trending.data
-      : DEMO_EVENTS
+      : apiOffline
+        ? DEMO_EVENTS
+        : []
   const tickerEvents = trending.data?.length ? trending.data : liveEvents
   const events = liveEvents
-  const board = stats.data ?? DEMO_STATS
+  const board = stats.data ?? (apiOffline ? DEMO_STATS : EMPTY_STATS)
+  const ingesting = !apiOffline && !loading && board.total_events === 0
 
   const pulseCountries = useMemo(
     () => board.hottest_countries.slice(0, 4),
@@ -48,8 +61,11 @@ export function HomePage() {
               The world, pulsing in real time.
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-muted">
-              {board.events_last_24h.toLocaleString()} events in the last 24 hours across{' '}
-              {board.total_countries} countries.
+              {loading
+                ? 'Loading live signals…'
+                : ingesting
+                  ? 'Pulling the latest GDELT signals… the live map will fill in shortly.'
+                  : `${board.events_last_24h.toLocaleString()} events in the last 24 hours across ${board.total_countries} countries.`}
             </p>
             <ul className="mt-4 grid grid-cols-2 gap-2">
               {pulseCountries.map((country) => (

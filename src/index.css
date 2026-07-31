@@ -50,3 +50,93 @@
     background: rgba(61, 214, 198, 0.35);
   }
 }
+
+/* MapLibre event hover card — above Live theater (z-10) and ticker (z-20) */
+.geopulse-popup-anchor.maplibregl-popup {
+  z-index: 40;
+}
+
+.geopulse-popup-anchor .maplibregl-popup-content {
+  padding: 0;
+  background: rgba(13, 21, 32, 0.94);
+  border: 1px solid #243247;
+  border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  color: #c8d6e8;
+  font-family: var(--font-sans);
+}
+
+.geopulse-popup-anchor .maplibregl-popup-tip {
+  border-top-color: rgba(13, 21, 32, 0.94);
+}
+
+.geopulse-popup {
+  min-width: 240px;
+  max-width: 320px;
+  padding: 12px 14px 14px;
+}
+
+.geopulse-popup__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.geopulse-popup__badge {
+  border: 1px solid;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  padding: 2px 8px;
+  text-transform: uppercase;
+}
+
+.geopulse-popup__when {
+  color: #8fa3bd;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.geopulse-popup__title {
+  margin: 0 0 10px;
+  color: #f3f7fc;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.geopulse-popup__details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+  margin: 0;
+}
+
+.geopulse-popup__details dt {
+  color: #8fa3bd;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.geopulse-popup__details dd {
+  margin: 0;
+  color: #c8d6e8;
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.geopulse-popup__link {
+  display: inline-block;
+  margin-top: 10px;
+  color: #3dd6c6;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

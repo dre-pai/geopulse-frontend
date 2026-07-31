@@ -21,6 +21,7 @@ export function useEvents(params?: {
   category?: string
   q?: string
   limit?: number
+  hours?: number
 }) {
   return useQuery({
     queryKey: ['events', params],

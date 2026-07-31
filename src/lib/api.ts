@@ -36,12 +36,19 @@ export const api = {
     return request<Country[]>(`/countries${qs ? `?${qs}` : ''}`)
   },
   country: (ref: string) => request<CountryDetail>(`/countries/${ref}`),
-  events: (params?: { country?: string; category?: string; q?: string; limit?: number }) => {
+  events: (params?: {
+    country?: string
+    category?: string
+    q?: string
+    limit?: number
+    hours?: number
+  }) => {
     const search = new URLSearchParams()
     if (params?.country) search.set('country', params.country)
     if (params?.category) search.set('category', params.category)
     if (params?.q) search.set('q', params.q)
     if (params?.limit) search.set('limit', String(params.limit))
+    if (params?.hours) search.set('hours', String(params.hours))
     const qs = search.toString()
     return request<GeoEvent[]>(`/events${qs ? `?${qs}` : ''}`)
   },

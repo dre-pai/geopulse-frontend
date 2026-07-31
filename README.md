@@ -11,23 +11,47 @@ Interactive geopolitical intelligence dashboard — companion to `geopulse-backe
 - Recharts + Framer Motion
 - Tailwind CSS v4
 
-## Quick start
+## Quick start (recommended)
+
+Run the full stack from the backend repo (Docker installs deps and starts API + UI):
+
+```bash
+cd ../geopulse-backend
+./up.sh
+```
+
+App: http://localhost:5173  
+
+Production-like stack (nginx on port 3000, proxies `/api` to the API):
+
+```bash
+cd ../geopulse-backend
+./up.sh prod
+```
+
+## Frontend-only (without Docker)
 
 ```bash
 npm install
 npm run dev
 ```
 
-App: http://localhost:5173  
-
-Vite proxies `/api` → `http://localhost:8000`. Start the backend (Docker Compose) first for live data; the UI falls back to demo fixtures when the API is offline.
+Vite proxies `/api` → `http://localhost:8000`. Start the backend first for live data; the UI falls back to demo fixtures when the API is offline.
 
 Optional:
 
 ```bash
 cp .env.example .env
-# VITE_API_BASE=http://localhost:8000/api/v1
+# VITE_API_BASE=/api/v1
+# VITE_PROXY_TARGET=http://localhost:8000
 ```
+
+## Docker image
+
+Multi-stage `Dockerfile`:
+
+- `development` — Vite with HMR
+- `production` — static build served by nginx (proxies `/api` to the `api` service)
 
 ## Routes
 

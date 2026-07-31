@@ -1,17 +1,7 @@
 import { EVENT_CATEGORIES, type EventCategory } from '@/types/geopolitics'
+import { CATEGORY_COLORS, CATEGORY_LABELS } from '@/lib/categories'
 import { useUiStore } from '@/store/ui'
 import { cn } from '@/lib/utils'
-
-const LABELS: Record<EventCategory, string> = {
-  military: 'Military',
-  economics: 'Economics',
-  diplomacy: 'Diplomacy',
-  sanctions: 'Sanctions',
-  elections: 'Elections',
-  environment: 'Environment',
-  terrorism: 'Terrorism',
-  other: 'Other',
-}
 
 export function FilterSidebar() {
   const activeCategories = useUiStore((s) => s.activeCategories)
@@ -26,6 +16,7 @@ export function FilterSidebar() {
       <ul className="flex flex-col gap-2">
         {EVENT_CATEGORIES.map((category) => {
           const active = activeCategories.includes(category)
+          const color = CATEGORY_COLORS[category as EventCategory]
           return (
             <li key={category}>
               <button
@@ -34,17 +25,20 @@ export function FilterSidebar() {
                 className={cn(
                   'flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition',
                   active
-                    ? 'border-signal/40 bg-signal/10 text-fog'
+                    ? 'border-line bg-panel-elevated text-fog'
                     : 'border-transparent text-muted hover:border-line hover:bg-panel-elevated',
                 )}
               >
-                <span>{LABELS[category]}</span>
-                <span
-                  className={cn(
-                    'h-2 w-2 rounded-full',
-                    active ? 'bg-signal shadow-[0_0_10px_rgba(61,214,198,0.8)]' : 'bg-line',
-                  )}
-                />
+                <span className="flex items-center gap-2">
+                  <span
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{
+                      background: active ? color : 'var(--color-line)',
+                      boxShadow: active ? `0 0 10px ${color}` : undefined,
+                    }}
+                  />
+                  {CATEGORY_LABELS[category]}
+                </span>
               </button>
             </li>
           )

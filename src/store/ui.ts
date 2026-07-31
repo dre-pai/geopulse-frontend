@@ -22,6 +22,7 @@ export const useUiStore = create<UiState>((set, get) => ({
     'elections',
     'environment',
     'terrorism',
+    'other',
   ],
   selectedCountryIso2: null,
   searchQuery: '',

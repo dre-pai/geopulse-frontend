@@ -48,6 +48,8 @@ export interface GeoEvent {
   source_url?: string | null
   occurred_at: string
   country_id?: number | null
+  country_name?: string | null
+  country_iso2?: string | null
 }
 
 export interface RiskScore {
@@ -112,4 +114,5 @@ export const EVENT_CATEGORIES: EventCategory[] = [
   'elections',
   'environment',
   'terrorism',
+  'other',
 ]
