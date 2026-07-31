@@ -4,7 +4,9 @@ import {
   NavigationControl,
   Popup,
   type GeoJSONSource,
+  type MapGeoJSONFeature,
   type MapLayerMouseEvent,
+  type MapMouseEvent,
 } from 'maplibre-gl'
 import type { GeoEvent } from '@/types/geopolitics'
 import { categoryColor, categoryColorMatch, categoryLabel } from '@/lib/categories'
@@ -165,11 +167,13 @@ export function GlobeMap({ events, onSelectCountry }: GlobeMapProps) {
     map.addControl(new NavigationControl({ visualizePitch: true }), 'top-right')
     mapRef.current = map
     popupRef.current = new Popup({
-      closeButton: false,
+      closeButton: true,
       closeOnClick: false,
-      offset: 14,
+      // Keep the card close to the marker so the pointer can reach it.
+      offset: 12,
       maxWidth: '320px',
       className: 'geopulse-popup-anchor',
+      focusAfterOpen: false,
     })
 
     const resize = () => map.resize()
@@ -178,28 +182,95 @@ export function GlobeMap({ events, onSelectCountry }: GlobeMapProps) {
     const observer = new ResizeObserver(resize)
     observer.observe(containerRef.current)
 
-    const showPopup = (e: MapLayerMouseEvent) => {
-      const feature = e.features?.[0]
-      if (!feature || !popupRef.current) return
-      const id = Number(feature.properties?.id)
-      const event = eventsByIdRef.current.get(id)
-      if (!event || !e.lngLat) return
-      popupRef.current.setLngLat(e.lngLat).setDOMContent(buildPopupContent(event)).addTo(map)
+    let hideTimer: number | null = null
+    let activeEventId: number | null = null
+    let popupListeners: AbortController | null = null
+
+    const clearHideTimer = () => {
+      if (hideTimer != null) {
+        window.clearTimeout(hideTimer)
+        hideTimer = null
+      }
+    }
+
+    const isPointerOverPopup = () => {
+      const element = popupRef.current?.getElement()
+      return Boolean(element?.matches(':hover'))
     }
 
     const hidePopup = () => {
+      clearHideTimer()
+      activeEventId = null
+      popupListeners?.abort()
+      popupListeners = null
       popupRef.current?.remove()
     }
 
-    const onEnter = () => {
+    const scheduleHide = () => {
+      clearHideTimer()
+      hideTimer = window.setTimeout(() => {
+        if (isPointerOverPopup()) return
+        hidePopup()
+      }, 400)
+    }
+
+    const bindPopupPointer = () => {
+      const element = popupRef.current?.getElement()
+      if (!element) return
+      popupListeners?.abort()
+      popupListeners = new AbortController()
+      const { signal } = popupListeners
+      element.addEventListener(
+        'mouseenter',
+        () => {
+          clearHideTimer()
+        },
+        { signal },
+      )
+      element.addEventListener(
+        'mouseleave',
+        () => {
+          scheduleHide()
+        },
+        { signal },
+      )
+    }
+
+    const openPopup = (feature: MapGeoJSONFeature) => {
+      if (!popupRef.current || feature.geometry?.type !== 'Point') return
+      const id = Number(feature.properties?.id)
+      const event = eventsByIdRef.current.get(id)
+      if (!event) return
+
+      const [lng, lat] = feature.geometry.coordinates
+      clearHideTimer()
+
+      if (activeEventId !== id || !popupRef.current.isOpen()) {
+        activeEventId = id
+        popupRef.current
+          .setLngLat([lng, lat])
+          .setDOMContent(buildPopupContent(event))
+          .addTo(map)
+        bindPopupPointer()
+        return
+      }
+
+      // Same event already open — leave DOM alone so the link stays interactive.
+      popupRef.current.setLngLat([lng, lat])
+    }
+
+    const onEnter = (e: MapLayerMouseEvent) => {
       map.getCanvas().style.cursor = 'pointer'
+      const feature = e.features?.[0]
+      if (feature) openPopup(feature)
     }
     const onLeave = () => {
       map.getCanvas().style.cursor = ''
-      hidePopup()
+      scheduleHide()
     }
     const onClick = (e: MapLayerMouseEvent) => {
       const feature = e.features?.[0]
+      if (feature) openPopup(feature)
       const iso = (feature?.properties?.country_iso2 as string | undefined) || undefined
       if (iso) {
         onSelectCountryRef.current?.(iso)
@@ -210,12 +281,19 @@ export function GlobeMap({ events, onSelectCountry }: GlobeMapProps) {
       onSelectCountryRef.current?.(event?.country_iso2 ?? null)
     }
 
+    const onMapClick = (e: MapMouseEvent) => {
+      const hits = map.queryRenderedFeatures(e.point, { layers: [CORE_LAYER_ID] })
+      if (hits.length === 0 && !isPointerOverPopup()) hidePopup()
+    }
+
     map.on('mouseenter', CORE_LAYER_ID, onEnter)
     map.on('mouseleave', CORE_LAYER_ID, onLeave)
-    map.on('mousemove', CORE_LAYER_ID, showPopup)
     map.on('click', CORE_LAYER_ID, onClick)
+    map.on('click', onMapClick)
 
     return () => {
+      clearHideTimer()
+      popupListeners?.abort()
       observer.disconnect()
       popupRef.current?.remove()
       popupRef.current = null

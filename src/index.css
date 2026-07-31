@@ -54,6 +54,18 @@
 /* MapLibre event hover card — above Live theater (z-10) and ticker (z-20) */
 .geopulse-popup-anchor.maplibregl-popup {
   z-index: 40;
+  pointer-events: auto !important;
+}
+
+/* Invisible bridge so the pointer can travel from the marker into the card. */
+.geopulse-popup-anchor.maplibregl-popup::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -18px;
+  height: 18px;
+  pointer-events: auto;
 }
 
 .geopulse-popup-anchor .maplibregl-popup-content {
@@ -64,6 +76,13 @@
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
   color: #c8d6e8;
   font-family: var(--font-sans);
+  pointer-events: auto !important;
+}
+
+.geopulse-popup-anchor .maplibregl-popup-close-button {
+  color: #8fa3bd;
+  font-size: 18px;
+  padding: 4px 8px;
 }
 
 .geopulse-popup-anchor .maplibregl-popup-tip {

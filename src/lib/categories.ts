@@ -1,3 +1,4 @@
+import type { ExpressionSpecification } from 'maplibre-gl'
 import type { EventCategory } from '@/types/geopolitics'
 
 /** Shared palette for map markers, filters, and ticker chips.
@@ -34,11 +35,26 @@ export function categoryLabel(category: string): string {
 }
 
 /** MapLibre `match` expression for circle paint. */
-export function categoryColorMatch(fallback = CATEGORY_COLORS.other): unknown[] {
-  const expr: unknown[] = ['match', ['get', 'category']]
-  for (const [category, color] of Object.entries(CATEGORY_COLORS)) {
-    expr.push(category, color)
-  }
-  expr.push(fallback)
-  return expr
+export function categoryColorMatch(fallback = CATEGORY_COLORS.other): ExpressionSpecification {
+  return [
+    'match',
+    ['get', 'category'],
+    'military',
+    CATEGORY_COLORS.military,
+    'economics',
+    CATEGORY_COLORS.economics,
+    'diplomacy',
+    CATEGORY_COLORS.diplomacy,
+    'sanctions',
+    CATEGORY_COLORS.sanctions,
+    'elections',
+    CATEGORY_COLORS.elections,
+    'environment',
+    CATEGORY_COLORS.environment,
+    'terrorism',
+    CATEGORY_COLORS.terrorism,
+    'other',
+    CATEGORY_COLORS.other,
+    fallback,
+  ]
 }
